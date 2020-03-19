@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 import fr.usubelli.user.adapter.MongoUserRepository;
 import org.apache.commons.cli.*;
@@ -18,8 +19,16 @@ public class RunUserVertx {
         Options options = new Options();
 
         Option input = new Option("c", "config", true, "configuration file path");
-        input.setRequired(true);
+        input.setRequired(false);
         options.addOption(input);
+
+        Option port = new Option("p", "port", true, "port");
+        port.setRequired(false);
+        options.addOption(port);
+
+        Option authHtpasswdPath = new Option("authhtp", "auth-htpasswd-path", true, "auth htpasswd path");
+        authHtpasswdPath.setRequired(false);
+        options.addOption(authHtpasswdPath);
 
         Option sslActivated = new Option("ssl", "ssl", true, "ssl is activated");
         sslActivated.setRequired(false);
@@ -45,25 +54,30 @@ public class RunUserVertx {
             return;
         }
 
-        Config configuration = ConfigFactory.parseFile(new File(cmd.getOptionValue("config"))).resolve();
+        Config configuration = ConfigFactory.empty();
+        if (cmd.getOptionValue("config") != null) {
+            final File configFile = new File(cmd.getOptionValue("config"));
+            if (configFile.exists()) {
+                configuration = ConfigFactory.parseFile(configFile).resolve();
+            }
+        }
+
 
         final MongoUserRepository mongoUserRepository = new MongoUserRepository(
-                configuration.getString("mongo.host"),
-                configuration.getString("mongo.database"),
-                configuration.getString("mongo.collection"));
+                getString(configuration, "mongo.host", "localhost"),
+                getString(configuration, "mongo.database", "comptabilite"),
+                getString(configuration, "mongo.collection", "user"));
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         final VertxServer vertxServer = VertxServer.create();
-        if (configuration.getString("http.auth.type") != null
-            && configuration.getString("http.auth.type").equals("basic")) {
+        if (cmd.getOptionValue("auth-htpasswd-path") != null) {
             vertxServer
-                    .basicAuth(
-                            configuration.getString("http.auth.realm"),
-                            configuration.getString("http.auth.username"),
-                            configuration.getString("http.auth.password"));
+                    .htpasswd(
+                            cmd.getOptionValue("auth-htpasswd-realm", "accounting.user.api"),
+                            cmd.getOptionValue("auth-htpasswd-path", "src/main/resources/.htpasswd"));
         }
         if (Boolean.parseBoolean(cmd.getOptionValue("ssl", String.valueOf(false)))) {
             vertxServer
@@ -72,8 +86,18 @@ public class RunUserVertx {
         }
         vertxServer
                 .start(new UserVertx(mongoUserRepository, objectMapper),
-                        configuration.getInt("http.port"));
+                        Integer.parseInt(cmd.getOptionValue("port", "8585")));
 
+    }
+
+    private static String getString(final Config configuration, final String key, final String defaultValue) {
+        String value;
+        try {
+            value = configuration.getString(key);
+        } catch (ConfigException.Missing e) {
+            value = defaultValue;
+        }
+        return value;
     }
 
 }

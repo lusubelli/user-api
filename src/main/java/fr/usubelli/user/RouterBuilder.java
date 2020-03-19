@@ -1,6 +1,6 @@
 package fr.usubelli.user;
 
-import io.vertx.core.Future;
+import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BasicAuthHandler;
 
@@ -12,16 +12,8 @@ public class RouterBuilder {
         this.router = router;
     }
 
-    public RouterBuilder basicAuth(String realm, String username, String password) {
-        router.route().handler(BasicAuthHandler.create((authInfo, resultHandler) -> {
-            if (authInfo.getString("username").equals(username)
-                    && authInfo.getString("password").equals(password)) {
-                resultHandler.handle(Future.succeededFuture(null));
-            } else {
-                resultHandler.handle(Future.failedFuture("erreur"));
-            }
-        }, realm));
-        return this;
+    public void htpasswd(AuthProvider authProvider, String realm) {
+        router.route().handler(BasicAuthHandler.create(authProvider, realm));
     }
 
     public RouterBuilder protect() {
@@ -52,5 +44,4 @@ public class RouterBuilder {
     public Router build() {
         return this.router;
     }
-
 }

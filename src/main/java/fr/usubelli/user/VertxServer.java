@@ -4,6 +4,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.JksOptions;
+import io.vertx.ext.auth.htpasswd.HtpasswdAuth;
+import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
 import io.vertx.ext.web.Router;
 
 public class VertxServer {
@@ -18,8 +20,9 @@ public class VertxServer {
         this.httpServerOptions = new HttpServerOptions();
     }
 
-    public VertxServer basicAuth(String realm, String username, String password) {
-        this.routerBuilder.basicAuth(realm, username, password);
+    public VertxServer htpasswd(String realm, String path) {
+        HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, new HtpasswdAuthOptions().setHtpasswdFile(path));
+        this.routerBuilder.htpasswd(authProvider, realm);
         return this;
     }
 

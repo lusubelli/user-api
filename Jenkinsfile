@@ -26,12 +26,10 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'oc login -u developer -p developer --insecure-skip-tls-verify localhost:8443'
-                sh 'docker login -u developer -p $(oc whoami -t) 172.30.1.1:5000'
-                sh 'docker build -t 172.30.1.1:5000/accounting-dev/user-api:1.0.0 .'
-                sh 'docker push 172.30.1.1:5000/accounting-dev/user-api:1.0.0'
+                sh 'docker login -u developer -p $(oc whoami -t) 127.0.0.1:5000'
+                sh 'docker build -t 127.0.0.1:5000/accounting-dev/user-api:1.0.0 .'
+                sh 'docker push 127.0.0.1:5000/accounting-dev/user-api:1.0.0'
                 sh 'docker logout'
-                sh 'oc logout'
             }
         }
     }

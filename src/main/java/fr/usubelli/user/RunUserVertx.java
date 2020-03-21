@@ -65,7 +65,7 @@ public class RunUserVertx {
 
         final MongoUserRepository mongoUserRepository = new MongoUserRepository(
                 getString(configuration, "mongo.host", "localhost"),
-                getString(configuration, "mongo.database", "comptabilite"),
+                getString(configuration, "mongo.database", "accounting"),
                 getString(configuration, "mongo.collection", "user"));
 
         ObjectMapper objectMapper = new ObjectMapper();

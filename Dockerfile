@@ -6,4 +6,4 @@ COPY config/ config/
 
 EXPOSE 8585
 
-ENTRYPOINT ["java", "-jar", "user-api-1.0-SNAPSHOT.jar", "-cp", "libs/*", "--auth-htpasswd-path", "config/.htpasswd", "--config", "config/application.conf" ]
+ENTRYPOINT ["java", "-jar", "user-api-1.0-SNAPSHOT.jar", "--auth-htpasswd-path", "config/.htpasswd", "-config", "config/application.conf", "-cp", "libs/*" ]

@@ -1,4 +1,4 @@
-package fr.usubelli.user;
+package fr.usubelli.common;
 
 import io.vertx.ext.web.Router;
 

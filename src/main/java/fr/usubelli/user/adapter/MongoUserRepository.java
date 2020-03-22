@@ -3,6 +3,7 @@ package fr.usubelli.user.adapter;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import fr.usubelli.user.MongoConfig;
 import fr.usubelli.user.dto.User;
 import fr.usubelli.user.exception.UserAlreadyExistsException;
 import fr.usubelli.user.exception.UserNotFoundException;
@@ -15,24 +16,20 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class MongoUserRepository {
 
-    private final String host;
-    private final String databaseName;
-    private final String collection;
+    private final MongoConfig mongoConfig;
     private MongoCollection<User> userCollection;
 
-    public MongoUserRepository(String host, String databaseName, String collection) {
-        this.host = host;
-        this.databaseName = databaseName;
-        this.collection = collection;
+    public MongoUserRepository(MongoConfig mongoConfig) {
+        this.mongoConfig = mongoConfig;
     }
 
     private MongoCollection<User> userCollection() {
         if (userCollection == null) {
             CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
                     fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-            final MongoClient mongoClient = new MongoClient(host);
-            final MongoDatabase database = mongoClient.getDatabase(databaseName);
-            final MongoCollection<User> user = database.getCollection(collection, User.class);
+            final MongoClient mongoClient = new MongoClient(mongoConfig.getHost());
+            final MongoDatabase database = mongoClient.getDatabase(mongoConfig.getDatabase());
+            final MongoCollection<User> user = database.getCollection(mongoConfig.getCollection(), User.class);
             userCollection = user.withCodecRegistry(pojoCodecRegistry);
         }
         return userCollection;

@@ -1,4 +1,4 @@
-package fr.usubelli.user;
+package fr.usubelli.common;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -11,10 +11,10 @@ import io.vertx.ext.web.Router;
 public class VertxServer {
 
     private final Vertx vertx;
-    private final RouterBuilder routerBuilder;
+    private final VertxRouterBuilder routerBuilder;
     private final HttpServerOptions httpServerOptions;
 
-    public VertxServer(Vertx vertx, RouterBuilder routerBuilder) {
+    public VertxServer(Vertx vertx, VertxRouterBuilder routerBuilder) {
         this.vertx = vertx;
         this.routerBuilder = routerBuilder;
         this.httpServerOptions = new HttpServerOptions();
@@ -37,7 +37,7 @@ public class VertxServer {
     public static VertxServer create() {
         final Vertx vertx = Vertx.vertx(new VertxOptions());
         final Router router = Router.router(vertx);
-        return new VertxServer(vertx, RouterBuilder
+        return new VertxServer(vertx, VertxRouterBuilder
                 .router(router)
                 .protect());
     }

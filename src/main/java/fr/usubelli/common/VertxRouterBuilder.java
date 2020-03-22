@@ -1,14 +1,14 @@
-package fr.usubelli.user;
+package fr.usubelli.common;
 
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BasicAuthHandler;
 
-public class RouterBuilder {
+public class VertxRouterBuilder {
 
     private final Router router;
 
-    private RouterBuilder(Router router) {
+    private VertxRouterBuilder(Router router) {
         this.router = router;
     }
 
@@ -16,7 +16,7 @@ public class RouterBuilder {
         router.route().handler(BasicAuthHandler.create(authProvider, realm));
     }
 
-    public RouterBuilder protect() {
+    public VertxRouterBuilder protect() {
         router.route().handler(ctx -> {
             ctx.response()
                     // do not allow proxies to cache the data
@@ -37,8 +37,8 @@ public class RouterBuilder {
         return this;
     }
 
-    public static RouterBuilder router(Router router) {
-        return new RouterBuilder(router);
+    public static VertxRouterBuilder router(Router router) {
+        return new VertxRouterBuilder(router);
     }
 
     public Router build() {

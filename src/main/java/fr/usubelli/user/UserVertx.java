@@ -1,6 +1,7 @@
 package fr.usubelli.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.usubelli.common.VertxMicroService;
 import fr.usubelli.user.adapter.MongoUserRepository;
 import fr.usubelli.user.dto.User;
 import fr.usubelli.user.exception.UserAlreadyExistsException;

@@ -64,7 +64,7 @@ public class RunUserVertx {
 
 
         final MongoUserRepository mongoUserRepository = new MongoUserRepository(
-                getString(configuration, "mongo.host", "localhost"),
+                getString(configuration, "mongo.host", "mongodb"),
                 getString(configuration, "mongo.database", "accounting"),
                 getString(configuration, "mongo.collection", "user"));
 
@@ -74,6 +74,7 @@ public class RunUserVertx {
 
         final VertxServer vertxServer = VertxServer.create();
         if (cmd.getOptionValue("auth-htpasswd-path") != null) {
+
             vertxServer
                     .htpasswd(
                             cmd.getOptionValue("auth-htpasswd-realm", "accounting.user.api"),

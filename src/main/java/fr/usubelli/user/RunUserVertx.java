@@ -22,25 +22,25 @@ public class RunUserVertx {
         input.setRequired(false);
         options.addOption(input);
 
-        Option port = new Option("p", "port", true, "port");
-        port.setRequired(false);
-        options.addOption(port);
+        Option portOption = new Option("p", "port", true, "port");
+        portOption.setRequired(false);
+        options.addOption(portOption);
 
         Option authHtpasswdPath = new Option("authhtp", "auth-htpasswd-path", true, "auth htpasswd path");
         authHtpasswdPath.setRequired(false);
         options.addOption(authHtpasswdPath);
 
-        Option sslActivated = new Option("ssl", "ssl", true, "ssl is activated");
-        sslActivated.setRequired(false);
-        options.addOption(sslActivated);
+        Option sslActivatedOption = new Option("ssl", "ssl", true, "ssl is activated");
+        sslActivatedOption.setRequired(false);
+        options.addOption(sslActivatedOption);
 
-        Option sslKeystore = new Option("sslk", "ssl-keystore", true, "ssl keystore mandatory if ssl is activated");
-        sslKeystore.setRequired(false);
-        options.addOption(sslKeystore);
+        Option sslKeystoreOption = new Option("sslk", "ssl-keystore", true, "ssl keystore mandatory if ssl is activated");
+        sslKeystoreOption.setRequired(false);
+        options.addOption(sslKeystoreOption);
 
-        Option sslPassword = new Option("sslp", "ssl-password", true, "ssl password mandatory if ssl is activated");
-        sslPassword.setRequired(false);
-        options.addOption(sslPassword);
+        Option sslPasswordOption = new Option("sslp", "ssl-password", true, "ssl password mandatory if ssl is activated");
+        sslPasswordOption.setRequired(false);
+        options.addOption(sslPasswordOption);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -54,17 +54,23 @@ public class RunUserVertx {
             return;
         }
 
+        final String configPath = cmd.getOptionValue("config", "src/main/config/application.conf");
+        final String authHtPasswdPath = cmd.getOptionValue("auth-htpasswd-path", "src/main/resources/.htpasswd");
+        final String authHtpasswdRealm = cmd.getOptionValue("auth-htpasswd-realm", "accounting.user.api");
+        final boolean sslActivated = Boolean.parseBoolean(cmd.getOptionValue("ssl", String.valueOf(false)));
+        final String sslKeystore = cmd.getOptionValue("ssl-keystore", "ssl\\localhost.keystore");
+        final String sslPassword = cmd.getOptionValue("ssl-password", "password");
+        final int port = Integer.parseInt(cmd.getOptionValue("port", "8585"));
+
+        System.out.println(String.format("Loading config from %s", configPath));
         Config configuration = ConfigFactory.empty();
-        if (cmd.getOptionValue("config") != null) {
-            final File configFile = new File(cmd.getOptionValue("config"));
-            if (configFile.exists()) {
-                configuration = ConfigFactory.parseFile(configFile).resolve();
-            }
+        final File configFile = new File(configPath);
+        if (configFile.exists()) {
+            configuration = ConfigFactory.parseFile(configFile).resolve();
         }
 
-
         final MongoUserRepository mongoUserRepository = new MongoUserRepository(
-                getString(configuration, "mongo.host", "mongodb"),
+                getString(configuration, "mongo.host", "localhost"),
                 getString(configuration, "mongo.database", "accounting"),
                 getString(configuration, "mongo.collection", "user"));
 
@@ -73,21 +79,13 @@ public class RunUserVertx {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         final VertxServer vertxServer = VertxServer.create();
-        if (cmd.getOptionValue("auth-htpasswd-path") != null) {
-
-            vertxServer
-                    .htpasswd(
-                            cmd.getOptionValue("auth-htpasswd-realm", "accounting.user.api"),
-                            cmd.getOptionValue("auth-htpasswd-path", "src/main/resources/.htpasswd"));
+        if (authHtPasswdPath != null) {
+            vertxServer.htpasswd(authHtpasswdRealm, authHtPasswdPath);
         }
-        if (Boolean.parseBoolean(cmd.getOptionValue("ssl", String.valueOf(false)))) {
-            vertxServer
-                    .ssl(cmd.getOptionValue("ssl-keystore", "ssl\\localhost.keystore"),
-                            cmd.getOptionValue("ssl-password", "password"));
+        if (sslActivated) {
+            vertxServer.ssl(sslKeystore, sslPassword);
         }
-        vertxServer
-                .start(new UserVertx(mongoUserRepository, objectMapper),
-                        Integer.parseInt(cmd.getOptionValue("port", "8585")));
+        vertxServer.start(new UserVertx(mongoUserRepository, objectMapper), port);
 
     }
 

@@ -7,6 +7,7 @@ import fr.usubelli.user.dto.User;
 import fr.usubelli.user.exception.UserAlreadyExistsException;
 import fr.usubelli.user.exception.UserNotFoundException;
 import io.vertx.core.Handler;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -23,7 +24,7 @@ public class UserVertx implements VertxMicroService {
         this.objectMapper = objectMapper;
     }
 
-    public void route(Router router) {
+    public void route(Router router, JWTAuth auth) {
         router.route().handler(BodyHandler.create());
         router.post("/user")
                 .produces(APPLICATION_JSON)

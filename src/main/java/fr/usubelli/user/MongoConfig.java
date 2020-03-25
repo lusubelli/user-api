@@ -1,9 +1,8 @@
 package fr.usubelli.user;
 
-import com.typesafe.config.Config;
 import fr.usubelli.common.Configuration;
 
-public class MongoConfig extends Configuration {
+public class MongoConfig {
 
     private static final String HOST = "host";
     private static final String DATABASE = "database";
@@ -13,19 +12,21 @@ public class MongoConfig extends Configuration {
     private static final String DEFAULT_DATABASE = "accounting";
     private static final String DEFAULT_COLLECTION = "user";
 
-    public MongoConfig(Config config) {
-        super(config);
+    private final Configuration configuration;
+
+    public MongoConfig(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     public String getHost() {
-        return getString(HOST, DEFAULT_HOST);
+        return configuration.getString(HOST, DEFAULT_HOST);
     }
 
     public String getDatabase() {
-        return getString(DATABASE, DEFAULT_DATABASE);
+        return configuration.getString(DATABASE, DEFAULT_DATABASE);
     }
 
     public String getCollection() {
-        return getString(COLLECTION, DEFAULT_COLLECTION);
+        return configuration.getString(COLLECTION, DEFAULT_COLLECTION);
     }
 }

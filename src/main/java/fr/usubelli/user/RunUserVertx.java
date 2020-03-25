@@ -3,51 +3,44 @@ package fr.usubelli.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import fr.usubelli.common.VertxCommand;
-import fr.usubelli.common.VertxConfiguration;
-import fr.usubelli.common.VertxServer;
+import fr.usubelli.common.*;
 import fr.usubelli.user.adapter.MongoUserRepository;
-import org.apache.commons.cli.*;
-
-import java.io.File;
+import org.apache.commons.cli.ParseException;
 
 public class RunUserVertx {
 
+    private static final String DEFAULT_APPLICATION_CONF = "src/main/resources/application.conf";
 
     public static void main(String[] args) {
 
-        VertxConfiguration vertxConfiguration;
+        Configuration configuration;
         try {
-            vertxConfiguration = new VertxCommand().parse(args);
+            configuration = MicroServiceCommand.parse(args, DEFAULT_APPLICATION_CONF);
         } catch (ParseException e) {
             System.exit(1);
             return;
         }
 
-        System.out.println(String.format("Loading config from %s", vertxConfiguration.getConfigPath()));
-        System.out.println(String.format("HTTPS : %s", vertxConfiguration.getSslKeystorePath() != null));
-        System.out.println(String.format("HTPASSWD : %s", vertxConfiguration.getAuthHtpasswdPath() != null));
-
-        Config configuration = ConfigFactory.empty();
-        final File configFile = new File(vertxConfiguration.getConfigPath());
-        if (configFile.exists()) {
-            configuration = ConfigFactory.parseFile(configFile).resolve();
+        if (configuration == null) {
+            System.exit(1);
+            return;
         }
 
-        final MongoUserRepository mongoUserRepository = new MongoUserRepository(new MongoConfig(configuration.getConfig("mongo")));
+        ObjectMapper serverObjectMapper = new ObjectMapper();
+        serverObjectMapper.registerModule(new JavaTimeModule());
+        serverObjectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        final VertxMicroService microService = new UserVertx(
+                new MongoUserRepository(new MongoConfig(configuration.getConfiguration("mongo", null))), serverObjectMapper);
 
-        final VertxServer vertxServer = VertxServer.create();
-        vertxServer.htpasswd(vertxConfiguration.getAuthHtpasswdRealm(), vertxConfiguration.getAuthHtpasswdPath());
-        if (vertxConfiguration.getSslKeystorePath() != null) {
-            vertxServer.ssl(vertxConfiguration.getSslKeystorePath(), vertxConfiguration.getSslPassword());
-        }
-        vertxServer.start(new UserVertx(mongoUserRepository, objectMapper), vertxConfiguration.getPort());
+        VertxServer.create(
+                new MicroServiceConfiguration(configuration.getInt("http.port", 8080))
+                        .basic(configuration.getConfiguration("http.basic", null))
+                        .ssl(configuration.getConfiguration("http.ssl", null))
+                        .jwt(configuration.getConfiguration("http.jwt", null)))
+                .start(microService);
+
+
 
     }
 

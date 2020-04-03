@@ -132,4 +132,16 @@
         <url>https://github.com/lusubelli/user-api.git</url>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>snapshots</id>
+            <name>Central Snapshot Repository</name>
+            <url>http://myrepository/snapshots</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    
 </project>

@@ -132,16 +132,17 @@
         <url>https://github.com/lusubelli/user-api.git</url>
     </scm>
 
-    <repositories>
+    <distributionManagement>
         <repository>
-            <id>snapshots</id>
-            <name>Central Snapshot Repository</name>
-            <url>http://myrepository/snapshots</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>nexus</id>
+            <name>Releases</name>
+            <url>http://localhost:8081/repository/releases</url>
         </repository>
-    </repositories>
-    
+        <snapshotRepository>
+            <id>nexus</id>
+            <name>Snapshot</name>
+            <url>http://localhost:8081/repository/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 </project>

@@ -31,11 +31,12 @@
                 <include>*.jar</include>
             </includes>
         </fileSet>
-        <files>
-            <file>
-                <source>Dockerfile</source>
-                <outputDirectory>${project.build.directory}/</outputDirectory>
-            </file>
-        </files>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>Dockerfile</include>
+            </includes>
+        </fileSet>
+
     </fileSets>
 </assembly>

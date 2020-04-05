@@ -116,10 +116,10 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/Dockerfile</outputDirectory>
+                            <outputDirectory>${project.build.directory}/Dockerfile</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}\</directory>
+                                    <directory>${basedir}\</directory>
                                 </resource>
                             </resources>
                         </configuration>

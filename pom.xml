@@ -145,14 +145,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>${basedir}\</directory>
-                <includes>
-                    <include>Dockerfile</include>
-                </includes>
-            </resource>
-        </resources>
     </build>
 
     <scm>
